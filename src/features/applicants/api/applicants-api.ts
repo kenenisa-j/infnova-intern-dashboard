@@ -38,4 +38,9 @@ export const applicantsApi = {
         const response = await axiosInstance.get(`/applicants/${id}`);
         return response.data;
     },
+
+    updateApplicantStatus: async (id: string | number, status: string): Promise<Applicant> => {
+        const response = await axiosInstance.patch(`/applicants/${id}/status`, { status });
+        return response.data;
+    },
 };
