@@ -33,4 +33,9 @@ export const applicantsApi = {
         const response = await axiosInstance.get("/applicants", { params });
         return response.data;
     },
+
+    getApplicantById: async (id: string | number): Promise<Applicant> => {
+        const response = await axiosInstance.get(`/applicants/${id}`);
+        return response.data;
+    },
 };
