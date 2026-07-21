@@ -3,42 +3,120 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/features/auth/api/auth-api";
+import { Lock, Mail, AlertCircle, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
+        setIsLoading(true);
+
+        // Clear any old/invalid token before attempting new login
+        localStorage.removeItem("accessToken");
+
         try {
             const response = await authApi.login({ email, password });
-            // Store the token safely in localStorage
-            localStorage.setItem("accessToken", response.accessToken);
-            // Redirect to dashboard
-            router.push("/dashboard");
-        } catch (error) {
-            alert("Login failed. Please check your credentials.");
+            if (response?.accessToken) {
+                localStorage.setItem("accessToken", response.accessToken);
+                router.push("/dashboard");
+            } else {
+                setError("Invalid response from server. Missing access token.");
+            }
+        } catch (err: any) {
+            if (err.response?.status === 401) {
+                setError("Unauthorized: Invalid email or password. Please check your credentials.");
+            } else if (err.response?.data?.message) {
+                setError(err.response.data.message);
+            } else {
+                setError("Login failed. Please check your internet connection or try again later.");
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <form onSubmit={handleLogin} className="flex flex-col gap-4 p-8">
-            <input
-                type="email"
-                placeholder="Email"
-                onChange={(e) => setEmail(e.target.value)}
-                className="border p-2"
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                onChange={(e) => setPassword(e.target.value)}
-                className="border p-2"
-            />
-            <button type="submit" className="bg-blue-600 text-white p-2">
-                Login
-            </button>
-        </form>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+            <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                <div className="text-center">
+                    <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+                        INFNOVA Portal
+                    </h2>
+                    <p className="mt-2 text-sm text-gray-600">
+                        Sign in to access your intern management dashboard
+                    </p>
+                </div>
+
+                {error && (
+                    <div className="flex items-start gap-3 rounded-lg bg-red-50 p-4 text-sm text-red-700 border border-red-200 animate-in fade-in duration-200">
+                        <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+                        <div>{error}</div>
+                    </div>
+                )}
+
+                <form onSubmit={handleLogin} className="mt-8 space-y-6">
+                    <div className="space-y-4 rounded-md shadow-sm">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Email Address
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <Mail size={18} />
+                                </div>
+                                <input
+                                    type="email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="admin@infnova.com"
+                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Password
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <Lock size={18} />
+                                </div>
+                                <input
+                                    type="password"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
+                    >
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Signing in...
+                            </>
+                        ) : (
+                            "Sign In"
+                        )}
+                    </button>
+                </form>
+            </div>
+        </div>
     );
 }

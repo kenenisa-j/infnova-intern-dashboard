@@ -2,10 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LayoutDashboard, Users, LogOut, Menu, X } from "lucide-react";
+import { authApi } from "@/features/auth/api/auth-api";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            await authApi.logout();
+        } catch (error) {
+            console.error("Logout error:", error);
+        } finally {
+            localStorage.removeItem("accessToken");
+            router.push("/login");
+        }
+    };
 
     return (
         <div className="min-h-screen flex bg-gray-50">
@@ -19,7 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <Link href="/dashboard/applicants" className="flex items-center gap-3 p-3 rounded hover:bg-gray-100">
                         <Users size={20} /> Applicants
                     </Link>
-                    <button onClick={() => {/* Add logout logic here */ }} className="flex items-center gap-3 p-3 w-full text-red-600 rounded hover:bg-red-50">
+                    <button onClick={handleLogout} className="flex items-center gap-3 p-3 w-full text-red-600 rounded hover:bg-red-50">
                         <LogOut size={20} /> Logout
                     </button>
                 </nav>
