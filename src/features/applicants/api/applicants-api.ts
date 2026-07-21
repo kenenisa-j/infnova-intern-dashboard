@@ -21,6 +21,7 @@ export interface GetApplicantsParams {
     page?: number;
     limit?: number;
     status?: string;
+    track?: string;
     search?: string;
     sort?: string;
     delay?: number;
