@@ -1,27 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 import { referenceApi } from "./reference-api";
 
-export function useReferenceData() {
-    return useQuery({
-        queryKey: ["reference-data"],
-        queryFn: () => referenceApi.getReferenceData(),
-        staleTime: 1000 * 60 * 10, // Cache data for 10 minutes
-    });
-}
-
-// Convenience hooks if you want them separated
 export function useTracks() {
-    const { data, ...rest } = useReferenceData();
+    const { data, ...rest } = useQuery({
+        queryKey: ["tracks"],
+        queryFn: () => referenceApi.getTracks(),
+        staleTime: 1000 * 60 * 10,
+    });
     return {
         ...rest,
-        tracks: data?.tracks || [],
+        tracks: data || [],
     };
 }
 
 export function useStatuses() {
-    const { data, ...rest } = useReferenceData();
+    const { data, ...rest } = useQuery({
+        queryKey: ["application-statuses"],
+        queryFn: () => referenceApi.getStatuses(),
+        staleTime: 1000 * 60 * 10,
+    });
     return {
         ...rest,
-        statuses: data?.statuses || [],
+        statuses: data || [],
     };
 }

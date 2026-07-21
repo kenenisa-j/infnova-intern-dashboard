@@ -146,7 +146,11 @@ export function ApplicantsTable() {
                                 </tr>
                             ) : (
                                 applicants.map((applicant) => (
-                                    <tr key={applicant.id} className="hover:bg-gray-50 transition-colors">
+                                    <tr
+                                        key={applicant.id}
+                                        onClick={() => router.push(`/dashboard/applicants/${applicant.id}`)}
+                                        className="hover:bg-blue-50/50 cursor-pointer transition-colors"
+                                    >
                                         <td className="p-4 font-medium text-gray-900">{applicant.fullName}</td>
                                         <td className="p-4 text-gray-600">{applicant.email}</td>
                                         <td className="p-4">{applicant.track}</td>

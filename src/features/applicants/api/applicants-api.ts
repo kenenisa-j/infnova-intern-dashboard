@@ -30,7 +30,13 @@ export interface GetApplicantsParams {
 
 export const applicantsApi = {
     getApplicants: async (params: GetApplicantsParams): Promise<ApplicantsResponse> => {
-        const response = await axiosInstance.get("/applicants", { params });
+        const cleanedParams: Record<string, any> = {};
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== "") {
+                cleanedParams[key] = value;
+            }
+        });
+        const response = await axiosInstance.get("/applicants", { params: cleanedParams });
         return response.data;
     },
 

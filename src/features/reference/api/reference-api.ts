@@ -6,15 +6,26 @@ export interface ReferenceItem {
     name: string;
 }
 
-export interface ReferenceDataResponse {
-    tracks: ReferenceItem[];
-    statuses: ReferenceItem[];
-}
-
 export const referenceApi = {
-    // Fetch tracks and statuses (adjust endpoints according to your /api/docs)
-    getReferenceData: async (): Promise<ReferenceDataResponse> => {
-        const response = await axiosInstance.get("/reference");
-        return response.data;
+    getTracks: async (): Promise<ReferenceItem[]> => {
+        const response = await axiosInstance.get("/tracks");
+        const data = response.data;
+        if (Array.isArray(data)) {
+            return data.map((item, idx) =>
+                typeof item === "string" ? { id: item, name: item } : { id: item.id ?? item.name ?? idx, name: item.name ?? item.title ?? String(item) }
+            );
+        }
+        return [];
+    },
+
+    getStatuses: async (): Promise<ReferenceItem[]> => {
+        const response = await axiosInstance.get("/application-statuses");
+        const data = response.data;
+        if (Array.isArray(data)) {
+            return data.map((item, idx) =>
+                typeof item === "string" ? { id: item, name: item } : { id: item.id ?? item.name ?? idx, name: item.name ?? item.title ?? String(item) }
+            );
+        }
+        return [];
     },
 };
