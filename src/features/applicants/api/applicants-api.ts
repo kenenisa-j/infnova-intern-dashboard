@@ -6,15 +6,18 @@ export interface Applicant {
     email: string;
     track: string;
     status: string;
-    createdAt: string;
+    createdAt?: string;
+    applicationDate?: string;
 }
 
 export interface ApplicantsResponse {
     data: Applicant[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
+    meta: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
 }
 
 export interface GetApplicantsParams {
@@ -23,7 +26,8 @@ export interface GetApplicantsParams {
     status?: string;
     track?: string;
     search?: string;
-    sort?: string;
+    sortBy?: string;
+    sortOrder?: string;
     delay?: number;
     simulateError?: boolean;
 }
@@ -40,8 +44,8 @@ export const applicantsApi = {
         return response.data;
     },
 
-    getApplicantById: async (id: string | number): Promise<Applicant> => {
-        const response = await axiosInstance.get(`/applicants/${id}`);
+    getApplicantById: async (id: string | number, params?: { delay?: number; simulateError?: boolean }): Promise<Applicant> => {
+        const response = await axiosInstance.get(`/applicants/${id}`, { params });
         return response.data;
     },
 

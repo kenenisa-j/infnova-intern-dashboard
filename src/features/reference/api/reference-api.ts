@@ -9,22 +9,34 @@ export interface ReferenceItem {
 export const referenceApi = {
     getTracks: async (): Promise<ReferenceItem[]> => {
         const response = await axiosInstance.get("/tracks");
-        const data = response.data;
+        // API response has a 'data' array envelope
+        const data = response.data?.data || response.data;
         if (Array.isArray(data)) {
-            return data.map((item, idx) =>
-                typeof item === "string" ? { id: item, name: item } : { id: item.id ?? item.name ?? idx, name: item.name ?? item.title ?? String(item) }
-            );
+            return data.map((item, idx) => {
+                if (typeof item === "string") {
+                    return { id: item, name: item };
+                }
+                const val = item.value ?? item.id ?? idx;
+                const lbl = item.label ?? item.name ?? String(item);
+                return { id: val, name: lbl };
+            });
         }
         return [];
     },
 
     getStatuses: async (): Promise<ReferenceItem[]> => {
         const response = await axiosInstance.get("/application-statuses");
-        const data = response.data;
+        // API response has a 'data' array envelope
+        const data = response.data?.data || response.data;
         if (Array.isArray(data)) {
-            return data.map((item, idx) =>
-                typeof item === "string" ? { id: item, name: item } : { id: item.id ?? item.name ?? idx, name: item.name ?? item.title ?? String(item) }
-            );
+            return data.map((item, idx) => {
+                if (typeof item === "string") {
+                    return { id: item, name: item };
+                }
+                const val = item.value ?? item.id ?? idx;
+                const lbl = item.label ?? item.name ?? String(item);
+                return { id: val, name: lbl };
+            });
         }
         return [];
     },
