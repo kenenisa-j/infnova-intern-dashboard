@@ -34,7 +34,7 @@ api.interceptors.response.use(
             if (!isLoginRequest) {
                 localStorage.removeItem("accessToken");
                 if (window.location.pathname !== "/login") {
-                    window.location.href = "/login";
+                    window.location.href = "/login?expired=true";
                 }
             }
         }

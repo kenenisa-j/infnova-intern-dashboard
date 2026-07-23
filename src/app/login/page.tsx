@@ -1,16 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { authApi } from "@/features/auth/api/auth-api";
-import { Lock, Mail, AlertCircle, Loader2 } from "lucide-react";
+import { Lock, Mail, AlertCircle, Loader2, ShieldAlert } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const isExpired = searchParams.get("expired") === "true";
+
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (token) {
+            router.replace("/dashboard");
+        }
+    }, [router]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,6 +62,15 @@ export default function LoginPage() {
                     </p>
                 </div>
 
+                {isExpired && !error && (
+                    <div className="flex items-start gap-3 rounded-lg bg-amber-50 p-4 text-sm text-amber-700 border border-amber-200 animate-in fade-in duration-200">
+                        <ShieldAlert className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                        <div>
+                            <span className="font-semibold">Session Expired:</span> Your session has timed out. Please log in again to continue.
+                        </div>
+                    </div>
+                )}
+
                 {error && (
                     <div className="flex items-start gap-3 rounded-lg bg-red-50 p-4 text-sm text-red-700 border border-red-200 animate-in fade-in duration-200">
                         <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
@@ -75,7 +93,7 @@ export default function LoginPage() {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="admin@infnova.com"
+                                    placeholder="admin@infnova.tech"
                                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                 />
                             </div>
@@ -118,5 +136,17 @@ export default function LoginPage() {
                 </form>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            </div>
+        }>
+            <LoginForm />
+        </Suspense>
     );
 }
