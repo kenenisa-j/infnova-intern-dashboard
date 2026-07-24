@@ -26,17 +26,15 @@ export default function ApplicantDetailPage({ params }: PageProps) {
 
     const { statuses } = useStatuses();
 
-    // Optimistic Mutation Hook
     const { mutate: updateStatus, isPending: isUpdating } = useMutation({
         mutationFn: (newStatus: string) => applicantsApi.updateApplicantStatus(applicantId, newStatus),
         onMutate: async (newStatus) => {
-            // Cancel outgoing refetches so they don't overwrite our optimistic update
+           
             await queryClient.cancelQueries({ queryKey: ["applicant", applicantId] });
 
-            // Snapshot the previous value
             const previousApplicant = queryClient.getQueryData<Applicant>(["applicant", applicantId]);
 
-            // Optimistically update to the new value
+          
             if (previousApplicant) {
                 queryClient.setQueryData<Applicant>(["applicant", applicantId], {
                     ...previousApplicant,
@@ -49,7 +47,7 @@ export default function ApplicantDetailPage({ params }: PageProps) {
             return { previousApplicant };
         },
         onError: (err, newStatus, context) => {
-            // Rollback on failure
+            
             if (context?.previousApplicant) {
                 queryClient.setQueryData(["applicant", applicantId], context.previousApplicant);
             }
@@ -59,14 +57,14 @@ export default function ApplicantDetailPage({ params }: PageProps) {
             toast.success(`Successfully updated applicant status to ${newStatus}!`);
         },
         onSettled: () => {
-            // Refetch to ensure server sync
+            
             queryClient.invalidateQueries({ queryKey: ["applicant", applicantId] });
             queryClient.invalidateQueries({ queryKey: ["applicants"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] });
         },
     });
 
-    // Helper to format date safely
+    
     const formatDate = (dateStr?: string, fallbackStr?: string) => {
         const dateVal = dateStr || fallbackStr;
         if (!dateVal) return "N/A";
@@ -132,7 +130,7 @@ export default function ApplicantDetailPage({ params }: PageProps) {
         );
     }
 
-    // Color badges based on applicant status
+   
     const statusLower = (applicant.status || "").toLowerCase();
     let badgeColor = "bg-gray-100 text-gray-800 border-gray-200";
     if (statusLower === "accepted") badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-200";

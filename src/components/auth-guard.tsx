@@ -10,7 +10,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
 
     useEffect(() => {
-        // Skip auth check if we are already on the login page
+    
         if (pathname === "/login") {
             setIsLoading(false);
             return;
